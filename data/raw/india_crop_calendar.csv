@@ -1,0 +1,13 @@
+Crop,Percent of Total Production (%),Planting Months,Mid-Season Months,Harvest Months
+Barley,,Oct,Nov-Jan,Feb-Mar
+Peanut (Rabi),12,Sep-Oct,Dec-Jan,Feb-Mar
+Rapeseed (Rabi),,Oct,Dec-Jan,Feb-Mar
+Wheat,,Oct-Dec,Jan,Mar-Apr
+Corn (Kharif),75,Apr-Jun,Jul,Aug-Sep
+Cotton,,May-Jun,Jul-Sep,Oct-Nov
+"Millet (Kharif, Pearl)",89,Jun-Jul,Jul-Sep,Oct-Nov
+Peanut (Kharif),84,Jun-Jul,Jul-Sep,Sep-Oct
+Rice (Kharif),65,Jun-Jul,Aug,Sep-Oct
+Sorghum (Kharif),43,Jun-Jul,Jul-Sep,Oct-Nov
+Soybean,,Jun-Jul,Jul-Sep,Sep-Oct
+Sunflowerseed (Kharif),55,Jun-Jul,Aug,Sep-Oct
