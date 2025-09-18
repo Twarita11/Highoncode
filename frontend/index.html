@@ -1,0 +1,102 @@
+<!doctype html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Crop Demand Forecast Hack</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.plot.ly/plotly-2.18.0.min.js"></script>
+</head>
+<body class="bg-light">
+    <div class="container py-3">
+        <h3 class="mb-3">Tomato Price Forecast — Pune</h3>
+        <div id="alert-box" class="mb-2"></div>
+        <div id="chart" style="height:400px;"></div>
+        <div class="mt-2">
+            <button id="download" class="btn btn-sm btn-outline-primary">Download CSV</button>
+        </div>
+    </div>
+
+    <script>
+        async function loadChart() {
+            // Load forecast data
+            const res = await fetch('/api/forecast/price?crop=tomato&market_id=MAH_Pune&horizon=30');
+            const d = await res.json();
+            const dates = d.dates;
+            const pred = d.predicted;
+            const lower = d.lower;
+            const upper = d.upper;
+
+            const traceCI = {
+                x: [...dates, ...dates.slice().reverse()],
+                y: [...upper, ...lower.slice().reverse()],
+                fill: 'toself',
+                fillcolor: 'rgba(0, 123, 255, 0.1)',
+                line: { color: 'transparent' },
+                name: '80% Confidence',
+                showlegend: true,
+                hoverinfo: 'skip'
+            };
+
+            const tracePred = {
+                x: dates,
+                y: pred,
+                mode: 'lines+markers',
+                name: 'Predicted Price',
+                line: { color: '#007bff' },
+                marker: { color: '#007bff', size: 6 }
+            };
+
+            const layout = {
+                margin: { t: 10, r: 30, l: 50, b: 30 },
+                yaxis: { title: 'Price (₹/kg)' },
+                showlegend: true,
+                legend: { orientation: 'h', y: -0.2 },
+                responsive: true
+            };
+
+            Plotly.newPlot('chart', [traceCI, tracePred], layout);
+
+            // Load and display glut risk
+            const riskRes = await fetch('/api/risk/glut');
+            const risk = await riskRes.json();
+            
+            const alertClass = risk.signal === 'HIGH' ? 'danger' : 
+                             risk.signal === 'MEDIUM' ? 'warning' : 'success';
+            
+            document.getElementById('alert-box').innerHTML = `
+                <div class="alert alert-${alertClass}" role="alert">
+                    <strong>${risk.signal} Risk:</strong> ${risk.advisory}
+                </div>
+            `;
+        }
+
+        // Download CSV functionality
+        document.getElementById('download').addEventListener('click', async () => {
+            const res = await fetch('/api/forecast/price?crop=tomato&market_id=MAH_Pune&horizon=30');
+            const data = await res.json();
+            
+            // Create CSV content
+            const csv = [
+                'date,predicted,lower,upper',
+                ...data.dates.map((date, i) => 
+                    `${date},${data.predicted[i]},${data.lower[i]},${data.upper[i]}`
+                )
+            ].join('\n');
+            
+            // Trigger download
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.setAttribute('hidden', '');
+            a.setAttribute('href', url);
+            a.setAttribute('download', 'price_forecast.csv');
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        });
+
+        // Load chart on page load
+        loadChart();
+    </script>
+</body>
+</html>
